@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store Monitoring Program — JuiceNation & Jusrakjat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg-a:#C9D5FC; --bg-b:#E6DDFB; --bg-c:#D2DCFD;
+    --surface:#FFFFFF; --surface-2:#F5F6FC; --line:#EBECF6;
+    --ink:#14141C; --btn-bg:#14141C; --btn-fg:#FFFFFF; --tip-bg:#14141C;
+    --text:#191A24; --text-soft:#5E6175; --text-faint:#767A90;
+    --violet:#6656E3; --violet-soft:#E6E3FC; --highlight:#CFCBF7;
+    --peach:#FDEEDF; --peach-fg:#B85C14;
+    --lilac:#F0E8FA; --lilac-fg:#7650CC;
+    --sky:#E3EEFD; --sky-fg:#3567C8;
+    --mint:#E4F4E4; --mint-fg:#257A3C;
+    --butter:#F3F5C4; --butter-2:#FBFCEA;
+    --good:#257A3C; --good-soft:#E2F4E6;
+    --warn:#A8560F; --warn-soft:#FDEBD8;
+    --bad:#B93A34; --bad-soft:#FBE3E1;
+    --shadow:0 10px 28px -16px rgba(76,64,180,.28);
+    --radius:22px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg-a:#171A36; --bg-b:#231B43; --bg-c:#1A1F3D;
+      --surface:#1E2136; --surface-2:#282C46; --line:#2F3453;
+      --ink:#0A0B12; --btn-bg:#ECEEFA; --btn-fg:#14141C; --tip-bg:#2F3453;
+      --text:#EEF0FA; --text-soft:#B4B9D2; --text-faint:#8D93B2;
+      --violet:#9186F5; --violet-soft:#2E2A57; --highlight:#3A356E;
+      --peach:#3B2B21; --peach-fg:#F2AA6C;
+      --lilac:#2F2647; --lilac-fg:#BBA1F7;
+      --sky:#20304B; --sky-fg:#8DB0F4;
+      --mint:#1F3429; --mint-fg:#83D097;
+      --butter:#3A3B1F; --butter-2:#2A2C1E;
+      --good:#83D097; --good-soft:#1F3429;
+      --warn:#F2AA6C; --warn-soft:#3B2B21;
+      --bad:#F19A94; --bad-soft:#40232A;
+      --shadow:0 10px 28px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg-a:#171A36; --bg-b:#231B43; --bg-c:#1A1F3D;
+    --surface:#1E2136; --surface-2:#282C46; --line:#2F3453;
+    --ink:#0A0B12; --btn-bg:#ECEEFA; --btn-fg:#14141C; --tip-bg:#2F3453;
+    --text:#EEF0FA; --text-soft:#B4B9D2; --text-faint:#8D93B2;
+    --violet:#9186F5; --violet-soft:#2E2A57; --highlight:#3A356E;
+    --peach:#3B2B21; --peach-fg:#F2AA6C;
+    --lilac:#2F2647; --lilac-fg:#BBA1F7;
+    --sky:#20304B; --sky-fg:#8DB0F4;
+    --mint:#1F3429; --mint-fg:#83D097;
+    --butter:#3A3B1F; --butter-2:#2A2C1E;
+    --good:#83D097; --good-soft:#1F3429;
+    --warn:#F2AA6C; --warn-soft:#3B2B21;
+    --bad:#F19A94; --bad-soft:#40232A;
+    --shadow:0 10px 28px -16px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;min-height:100vh;padding:1px 0;color:var(--text);
+    font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.5;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice' fill='none' stroke='%237d72e0' stroke-opacity='.35' stroke-width='1.5'%3E%3Cpath d='M-40 260C200 120 380 60 560 -40'/%3E%3Cpath d='M-60 330C180 190 380 120 600 10'/%3E%3Cpath d='M900 -20C1000 200 1200 260 1500 220'/%3E%3Cpath d='M1000 940C1100 700 1300 620 1500 640'/%3E%3Cpath d='M-40 820C200 700 300 560 260 420'/%3E%3C/svg%3E") center/cover no-repeat fixed,
+      linear-gradient(160deg,var(--bg-a) 0%,var(--bg-b) 55%,var(--bg-c) 100%) fixed;
+  }
+  :focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+
+  /* ---------- Kanvas ---------- */
+  .shell{max-width:1320px;margin:32px auto 40px;background:var(--surface);border-radius:40px;padding:26px 30px 34px;box-shadow:0 40px 80px -40px rgba(70,58,190,.5);}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:26px;}
+  .logo{width:46px;height:46px;border-radius:16px;background:var(--btn-bg);color:var(--btn-fg);display:grid;place-items:center;flex:none;}
+  .hello{flex:1;min-width:0;margin-left:2px;}
+  .hello b{display:block;font-size:17px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hello span{font-size:12px;color:var(--text-soft);}
+  .hello em{font-style:normal;color:var(--violet);font-weight:600;}
+  .pill-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;border-radius:22px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+  .pill-btn:hover{background:var(--surface-2);}
+  .round-btn{width:46px;height:46px;border-radius:50%;border:none;display:grid;place-items:center;cursor:pointer;background:var(--surface-2);color:var(--text);flex:none;}
+  .round-btn.dark{background:var(--btn-bg);color:var(--btn-fg);}
+  .round-btn:hover{opacity:.88;}
+  .avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:700;font-size:13px;color:#fff;background:linear-gradient(135deg,#C9601A,#6656E3);box-shadow:0 0 0 2px var(--surface),0 0 0 4px #F3B77F;margin-left:4px;}
+
+  .body{display:grid;grid-template-columns:72px minmax(0,1fr);gap:26px;align-items:start;}
+  main{min-width:0;}
+  .rail{position:sticky;top:24px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+  .pillnav{background:var(--ink);border-radius:36px;padding:10px;display:flex;flex-direction:column;gap:8px;border:1px solid rgba(255,255,255,.06);}
+  .pillnav button{position:relative;width:48px;height:48px;border-radius:50%;border:none;background:none;color:rgba(255,255,255,.62);display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s;}
+  .pillnav button:hover{background:rgba(255,255,255,.12);color:#fff;}
+  .pillnav button.active{background:#fff;color:#14141C;}
+  .pillnav button::after{content:attr(data-label);position:absolute;left:calc(100% + 14px);top:50%;transform:translateY(-50%) translateX(-4px);background:var(--tip-bg);color:#fff;font-size:12px;font-weight:600;padding:6px 11px;border-radius:10px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:30;}
+  .pillnav button:hover::after,.pillnav button:focus-visible::after{opacity:1;transform:translateY(-50%);}
+  .rail-foot{position:relative;width:48px;height:48px;border-radius:50%;background:var(--surface-2);color:var(--text-soft);display:grid;place-items:center;}
+  .sync-dot{position:absolute;top:9px;right:9px;width:9px;height:9px;border-radius:50%;background:#E0A34C;box-shadow:0 0 0 2px var(--surface-2);}
+
+  /* ---------- Judul halaman ---------- */
+  header.page{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 24px;}
+  header.page h1{font-size:clamp(28px,3.2vw,36px);font-weight:600;letter-spacing:-.03em;line-height:1.1;margin:0;}
+  .sub{color:var(--text-soft);font-size:13.5px;}
+  header.page .sub{margin-top:6px;}
+  .muted{color:var(--text-faint);font-size:12.5px;}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;}
+  .chip{position:relative;display:inline-flex;align-items:center;height:42px;margin:0;border-radius:21px;border:1.5px solid var(--chip);background:var(--surface);color:var(--chip);font-weight:600;}
+  .chip.blue{--chip:var(--sky-fg);} .chip.orange{--chip:var(--peach-fg);}
+  .chip select{width:auto;height:100%;padding:0 38px 0 18px;border:none;border-radius:21px;background:transparent;background-image:none;color:inherit;font:inherit;font-size:13px;cursor:pointer;}
+  .chip::after{content:"";position:absolute;right:17px;top:50%;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-70%) rotate(45deg);pointer-events:none;}
+
+  .banner{background:var(--warn-soft);color:var(--warn);border-radius:16px;padding:12px 16px;font-size:12.5px;margin-bottom:18px;}
+
+  /* ---------- Kartu & form ---------- */
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-bottom:18px;box-shadow:var(--shadow);overflow-x:auto;}
+  .panel h2{font-size:16px;font-weight:700;letter-spacing:-.01em;margin:0 0 14px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .panel-head h2{margin:0;}
+
+  select,input[type=text],input[type=number],input[type=date],textarea{
+    font-family:inherit;font-size:13.5px;padding:11px 14px;border:1.5px solid transparent;border-radius:14px;background:var(--surface-2);color:var(--text);width:100%;transition:border-color .15s,background .15s;
+  }
+  select{appearance:none;-webkit-appearance:none;padding-right:38px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%238A8DA1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m1 1.5 5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center;}
+  input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;border-color:var(--violet);background-color:var(--surface);}
+  .chip select:focus-visible{border:none;outline:2px solid var(--violet);outline-offset:2px;}
+  label{font-size:12.5px;font-weight:600;color:var(--text-soft);display:block;margin-bottom:6px;}
+  .field{margin-bottom:12px;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;}
+  .row .field{flex:1;min-width:150px;}
+  input[type=checkbox]{accent-color:var(--violet);}
+
+  .btn{font-family:inherit;font-size:13.5px;font-weight:600;height:42px;padding:0 22px;border-radius:21px;border:1.5px solid transparent;cursor:pointer;background:var(--btn-bg);color:var(--btn-fg);display:inline-flex;align-items:center;justify-content:center;gap:8px;margin:0;transition:opacity .15s,background .15s;}
+  .btn:hover{opacity:.88;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn.primary{background:var(--btn-bg);color:var(--btn-fg);}
+  .btn.ghost{background:var(--surface);border-color:var(--line);color:var(--text);}
+  .btn.ghost:hover{background:var(--surface-2);opacity:1;}
+  .btn.danger{background:var(--bad-soft);color:var(--bad);}
+  .btn.small{height:34px;padding:0 15px;font-size:12.5px;}
+
+  table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:13px;min-width:520px;}
+  th{text-align:left;color:var(--text-faint);font-weight:600;font-size:12px;padding:2px 12px 4px;}
+  td{padding:12px;background:var(--surface-2);vertical-align:top;}
+  td:first-child{border-radius:14px 0 0 14px;} td:last-child{border-radius:0 14px 14px 0;}
+  td[colspan]{border-radius:14px;}
+  .tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap;}
+  .tag.on{background:var(--good-soft);color:var(--good);}
+  .tag.warn{background:var(--warn-soft);color:var(--warn);}
+  .tag.off{background:var(--bad-soft);color:var(--bad);}
+  .empty{color:var(--text-faint);text-align:center;padding:24px 10px;font-size:13px;}
+
+  .checkline{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;}
+  .checkline input{width:17px;height:17px;}
+  .store-entry{border-radius:18px;padding:14px 16px;margin-bottom:10px;background:var(--lilac);}
+  .store-entry .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;}
+  .store-entry .top input{background:var(--surface);}
+  .store-entry .chips{display:flex;gap:6px 16px;flex-wrap:wrap;}
+
+  /* ---------- Dashboard ---------- */
+  .dash{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start;}
+  .dash-main{min-width:0;}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin-bottom:18px;}
+  .kpi{border-radius:24px;padding:16px 18px 16px;display:flex;flex-direction:column;gap:10px;min-height:170px;}
+  .kpi.peach{background:var(--peach);--k:var(--peach-fg);}
+  .kpi.lilac{background:var(--lilac);--k:var(--lilac-fg);}
+  .kpi.sky{background:var(--sky);--k:var(--sky-fg);}
+  .kpi.mint{background:var(--mint);--k:var(--mint-fg);}
+  .kpi-top{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;line-height:1.3;}
+  .kpi-ico{width:32px;height:32px;border-radius:50%;background:var(--surface);color:var(--k);display:grid;place-items:center;flex:none;}
+  .kpi .num{font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1;margin-top:2px;}
+  .kpi .num small{font-size:14px;font-weight:600;color:var(--text-soft);margin-left:4px;letter-spacing:0;}
+  .kpi-foot{margin-top:auto;display:flex;flex-direction:column;align-items:flex-start;gap:10px;}
+  .delta{display:inline-block;white-space:nowrap;padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:700;background:var(--surface);}
+  .delta.good{color:var(--good);} .delta.warn{color:var(--warn);} .delta.bad{color:var(--bad);}
+  .spark{width:100%;height:36px;flex:none;display:block;}
+  .spark path{fill:none;stroke:var(--k);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;}
+  .bar{display:block;width:100%;height:10px;border-radius:8px;background:var(--surface);overflow:hidden;margin:13px 0 13px;}
+  .bar i{display:block;height:100%;border-radius:8px;background:var(--k);}
+  .stack{display:flex;padding-right:2px;}
+  .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:11.5px;font-weight:700;}
+  .av.t0{background:var(--peach);color:var(--peach-fg);}
+  .av.t1{background:var(--lilac);color:var(--lilac-fg);}
+  .av.t2{background:var(--sky);color:var(--sky-fg);}
+  .av.t3{background:var(--mint);color:var(--mint-fg);}
+  .stack .av{width:30px;height:30px;font-size:10px;margin-left:-6px;border:2px solid var(--surface);}
+  .stack .av:first-child{margin-left:0;}
+
+  .split{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;}
+  .split>*{min-width:0;}
+  .chart-wrap{position:relative;height:270px;}
+  .today-list{max-height:290px;overflow-y:auto;}
+  .today-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:var(--surface-2);margin-bottom:8px;}
+  .today-row .nm{flex:1;min-width:0;font-weight:600;font-size:13px;line-height:1.25;}
+  .today-row .nm small{display:block;font-weight:500;color:var(--text-faint);font-size:11.5px;}
+
+  .spot{position:sticky;top:24px;border-radius:28px;padding:20px 20px 18px;background:linear-gradient(180deg,var(--butter) 0%,var(--butter-2) 55%,var(--surface) 100%);border:1px solid var(--line);display:flex;flex-direction:column;gap:14px;}
+  .spot-head{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .spot-head h2{margin:0;font-size:15px;font-weight:700;}
+  .rank{white-space:nowrap;padding:4px 12px;border-radius:16px;background:var(--surface);border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--peach-fg);}
+  .spot-art{display:grid;place-items:center;}
+  .spot-art svg{width:100%;max-width:210px;height:auto;}
+  .spot-body{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;}
+  .spot-body>div:first-child{min-width:0;}
+  .spot-body h3{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.15;overflow-wrap:anywhere;}
+  .spot-body p{margin:6px 0 0;color:var(--text-soft);font-size:12.5px;}
+  .ring{position:relative;flex:none;width:68px;height:68px;}
+  .ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .ring .trk{stroke:var(--surface);}
+  .ring .val{stroke:var(--violet);stroke-linecap:round;}
+  .ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;font-weight:800;}
+  .spot-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .spot-stat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px;}
+  .spot-stat b{display:block;font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.1;}
+  .spot-stat span{font-size:12px;color:var(--text-soft);}
+
+  .hidden{display:none !important;}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--btn-bg);color:var(--btn-fg);padding:12px 20px;border-radius:22px;font-size:13px;font-weight:600;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:50;max-width:300px;box-shadow:0 12px 30px -10px rgba(0,0,0,.4);}
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  /* ---------- Responsif ---------- */
+  @media (max-width:1180px){
+    .dash{grid-template-columns:1fr;}
+    .spot{position:static;}
+    .spot-art svg{max-width:180px;}
+  }
+  @media (max-width:900px){
+    .split{grid-template-columns:1fr;}
+  }
+  @media (max-width:760px){
+    .shell{margin:10px;border-radius:28px;padding:16px 14px 24px;}
+    .topbar{gap:10px;margin-bottom:18px;}
+    .hello b{font-size:16px;}
+    .pill-btn{display:none;}
+    .body{grid-template-columns:1fr;gap:18px;}
+    .rail{position:static;flex-direction:row;justify-content:space-between;order:-1;}
+    .pillnav{flex-direction:row;padding:8px;border-radius:32px;overflow-x:auto;}
+    .pillnav button::after{display:none;}
+    .kpi{min-height:0;}
+  }
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+
+  /* ---------- Direktori Toko ---------- */
+  .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+  .dcard{background:var(--surface-2);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:5px;}
+  .dcard.done{background:var(--good-soft);border-color:var(--good);}
+  .dcard h3{margin:0;font-size:14.5px;font-weight:700;}
+  .dcard p{margin:0;color:var(--text-soft);font-size:12.5px;}
+  .dacts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .dacts .btn{text-decoration:none;}
+  .dchips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .dchip{font:inherit;font-size:12.5px;font-weight:600;height:36px;padding:0 16px;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer;}
+  .dchip[aria-pressed=true]{background:var(--btn-bg);color:var(--btn-fg);border-color:var(--btn-bg);}
+  .dnew{margin:0 0 14px;}
+  .dnew summary::-webkit-details-marker{display:none;}
+  .dstats{color:var(--text-soft);font-size:13px;margin:0 0 12px;}
+  /* ---------- Bukti foto & lokasi ---------- */
+  .evbox{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;padding:10px 12px;border:1.5px dashed var(--line);border-radius:14px;}
+  .evthumb{width:72px;height:72px;object-fit:cover;border-radius:10px;}
+  .evmeta{font-size:12px;color:var(--text-soft);flex:1;min-width:160px;}
+  .evmodal{position:fixed;inset:0;background:rgba(10,11,18,.6);z-index:100;display:grid;place-items:center;padding:16px;}
+  .evcard{background:var(--surface);border-radius:24px;padding:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto;}
+  .evitem{margin-bottom:18px;} .evitem img{width:100%;border-radius:12px;display:block;margin:8px 0;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar" id="topbar"></header>
+  <div class="body">
+    <aside class="rail">
+      <nav class="pillnav" id="nav" aria-label="Menu utama"></nav>
+      <div class="rail-foot" id="syncStatus" role="img" aria-label="Data tersimpan lokal di browser ini" title="Data tersimpan lokal di browser ini">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15h18v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M5.5 15 8 4.5h8L18.5 15"/><path d="M7 18h.01"/></svg>
+        <span class="sync-dot"></span>
+      </div>
+    </aside>
+    <main id="main"></main>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= Data layer: localStorage ================= */
+/* Catatan: versi ini berdiri sendiri (tanpa backend). Untuk data yang
+   dibagikan real-time ke banyak pengguna setelah di-deploy (Vercel dll),
+   sambungkan writeRecord()/deleteRecord()/initData() di bawah ini ke
+   backend pilihanmu (Firebase, Supabase, REST API sendiri, dst). */
+/* ====== KONFIGURASI SUPABASE: isi dua baris ini (Settings > API di dashboard Supabase) ====== */
+const SUPABASE_URL = 'https://qweokilefinyfxxpgqlj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_wpFKnESbZW0lkfE0yPImuQ_bfBidp0y';
+const sb = (SUPABASE_URL && SUPABASE_KEY && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+function sbOk(res, msg){ if(res && res.error){ console.error(res.error); toast(msg+': '+res.error.message); return false; } return true; }
+let lastDirSync = '', dirTimer = null;
+function queueDirSync(){
+  if(!sb) return;
+  clearTimeout(dirTimer);
+  dirTimer = setTimeout(async ()=>{
+    const cur = JSON.stringify([DATA.dirState, DATA.dirCustom]);
+    if(cur===lastDirSync) return;
+    const now = new Date().toISOString();
+    const r = await sb.from('smp_records').upsert([
+      {coll:'dirState', id:'main', data:DATA.dirState, updated_at:now},
+      {coll:'dirCustom', id:'main', data:{list:DATA.dirCustom}, updated_at:now}]);
+    if(sbOk(r,'Gagal sinkron direktori')) lastDirSync = cur;
+  }, 700);
+}
+let DATA = { sr: [], visits: [], storedb: [], tester: [], dirState: {}, dirCustom: [] };
+const dbApi = null; // tidak dipakai di versi statis ini — placeholder agar kode lain tak perlu diubah
+
+function localLoad(key, fallback){ try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } }
+function localSave(key, data){ try{ localStorage.setItem(key, JSON.stringify(data)); }catch(e){ console.error('save failed', e); } }
+function persistLocal(){ localSave('smp_sr', DATA.sr); localSave('smp_visits', DATA.visits); localSave('smp_storedb', DATA.storedb); localSave('smp_tester', DATA.tester); localSave('smp_dir', DATA.dirState); localSave('smp_dircustom', DATA.dirCustom); queueDirSync(); if(typeof renderTopbar==='function') renderTopbar(); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2600); }
+function fmtDate(d){ const dt=new Date(d+'T00:00:00'); return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}); }
+function monthKey(d){ return d.slice(0,7); }
+function monthLabel(mk){ const [y,m]=mk.split('-'); const dt=new Date(parseInt(y),parseInt(m)-1,1); return dt.toLocaleDateString('id-ID',{month:'long',year:'numeric'}); }
+
+function updateSyncBadge(){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  const msg = sb ? 'Tersambung ke Supabase' : 'Data tersimpan lokal di browser ini';
+  el.title = msg; el.setAttribute('aria-label', msg);
+}
+
+/* ---- Generic write/delete (localStorage) ---- */
+async function writeRecord(coll, id, data){
+  const finalId = id || uid();
+  const arr = DATA[coll];
+  const idx = arr.findIndex(x=>x.id===finalId);
+  const record = Object.assign({id:finalId}, data);
+  if(idx>=0) arr[idx]=record; else arr.push(record);
+  persistLocal();
+  if(sb) sbOk(await sb.from('smp_records').upsert({coll, id:finalId, data:record, updated_at:new Date().toISOString()}), 'Gagal sinkron ke Supabase');
+  return finalId;
+}
+async function deleteRecord(coll, id){
+  if(sb){
+    const r = await sb.from('smp_records').delete().eq('coll',coll).eq('id',id).select();
+    if(r.error){ toast('Gagal hapus: '+r.error.message); return; }
+    if(!r.data.length){ toast('Hapus ditolak: hanya admin yang boleh menghapus'); return; }
+  }
+  DATA[coll] = DATA[coll].filter(x=>x.id!==id);
+  persistLocal();
+}
+
+function loadLocalData(){
+  DATA.sr = localLoad('smp_sr', []);
+  DATA.visits = localLoad('smp_visits', []);
+  DATA.storedb = localLoad('smp_storedb', []);
+  DATA.tester = localLoad('smp_tester', []);
+  DATA.dirState = localLoad('smp_dir', {});
+  DATA.dirCustom = localLoad('smp_dircustom', []);
+}
+async function pullRemote(){
+  let rows = [], from = 0;
+  for(;;){
+    const r = await sb.from('smp_records').select('coll,id,data').range(from, from+999);
+    if(r.error){ toast('Gagal memuat dari Supabase, memakai data lokal: '+r.error.message); return; }
+    rows = rows.concat(r.data); if(r.data.length<1000) break; from += 1000;
+  }
+  const hasLocal = DATA.sr.length||DATA.visits.length||DATA.storedb.length||DATA.tester.length;
+  if(rows.length===0 && hasLocal){
+    /* Database masih kosong: unggah data lokal yang sudah ada (sekali saja) */
+    const now = new Date().toISOString(), up = [];
+    ['sr','visits','storedb','tester'].forEach(c=>DATA[c].forEach(x=>up.push({coll:c, id:x.id, data:x, updated_at:now})));
+    up.push({coll:'dirState', id:'main', data:DATA.dirState, updated_at:now}, {coll:'dirCustom', id:'main', data:{list:DATA.dirCustom}, updated_at:now});
+    if(sbOk(await sb.from('smp_records').upsert(up),'Gagal mengunggah data lokal')) toast('Data lokal diunggah ke Supabase');
+    lastDirSync = JSON.stringify([DATA.dirState, DATA.dirCustom]);
+    return;
+  }
+  const n = {sr:[], visits:[], storedb:[], tester:[]};
+  rows.forEach(x=>{
+    if(n[x.coll]) n[x.coll].push(x.data);
+    else if(x.coll==='dirState') DATA.dirState = x.data||{};
+    else if(x.coll==='dirCustom') DATA.dirCustom = (x.data&&x.data.list)||[];
+  });
+  Object.assign(DATA, n);
+  localSave('smp_sr', DATA.sr); localSave('smp_visits', DATA.visits); localSave('smp_storedb', DATA.storedb); localSave('smp_tester', DATA.tester); localSave('smp_dir', DATA.dirState); localSave('smp_dircustom', DATA.dirCustom);
+  lastDirSync = JSON.stringify([DATA.dirState, DATA.dirCustom]);
+}
+function showLogin(){
+  if(document.getElementById('loginBox')) return;
+  const ov = document.createElement('div'); ov.className='evmodal'; ov.id='loginBox';
+  ov.innerHTML = `<div class="evcard" role="dialog" aria-modal="true" style="max-width:400px">
+    <h2 style="margin:0 0 14px">Masuk</h2>
+    <div class="field"><label for="lgEmail">Email</label><input type="email" id="lgEmail" autocomplete="username"></div>
+    <div class="field"><label for="lgPass">Kata sandi</label><input type="password" id="lgPass" autocomplete="current-password"></div>
+    <button class="btn primary" type="button" id="lgGo">Masuk</button></div>`;
+  document.body.appendChild(ov);
+  const go = async ()=>{
+    const btn = ov.querySelector('#lgGo'); btn.disabled = true;
+    const r = await sb.auth.signInWithPassword({email:ov.querySelector('#lgEmail').value.trim(), password:ov.querySelector('#lgPass').value});
+    btn.disabled = false;
+    if(r.error){ toast('Gagal masuk: email atau kata sandi salah'); return; }
+    ov.remove(); initData();
+  };
+  ov.querySelector('#lgGo').addEventListener('click', go);
+  ov.querySelector('#lgPass').addEventListener('keydown', e=>{ if(e.key==='Enter') go(); });
+}
+async function initData(){
+  updateSyncBadge();
+  loadLocalData();
+  if(sb){
+    const ses = await sb.auth.getSession();
+    if(!ses.data.session){ renderMain(); showLogin(); return; }
+    await pullRemote();
+  }
+  renderMain();
+}
+
+/* ================= Ikon & util tampilan ================= */
+const PATHS = {
+  dashboard:'<rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/>',
+  harian:'<rect x="3" y="4" width="18" height="18" rx="4"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/>',
+  database:'<path d="M3 9l1.6-5h14.8L21 9"/><path d="M4.5 9v11h15V9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M10 20v-5h4v5"/>',
+  tester:'<path d="M10 2v7.5L4.6 18.6A2 2 0 0 0 6.3 21.6h11.4a2 2 0 0 0 1.7-3L14 9.5V2"/><path d="M8.5 2h7M7.5 15.5h9"/>',
+  sr:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17.5 14.2a5 5 0 0 1 4 5"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
+  download:'<path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  bars:'<path d="M5 20V11M12 20V4M19 20v-6"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>',
+  drop:'<path d="M12 3c3.6 4.3 6 7.2 6 10.5A6 6 0 0 1 6 13.5C6 10.2 8.4 7.3 12 3z" fill="currentColor" stroke="none"/>'
+};
+function icon(name, size, sw){
+  size = size || 22; sw = sw || 1.8;
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PATHS[name]||''}</svg>`;
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function initials(name){ const p = String(name||'').trim().split(/\s+/).filter(Boolean).slice(0,2); return p.map(w=>w[0]).join('').toUpperCase() || '?'; }
+
+/* ================= Topbar ================= */
+function renderTopbar(){
+  const el = document.getElementById('topbar');
+  if(!el) return;
+  const t = todayStr();
+  const todayStores = DATA.visits.filter(v=>v.date===t).reduce((a,v)=>a+(v.stores?v.stores.length:0),0);
+  el.innerHTML = `
+    <div class="logo" aria-hidden="true">${icon('drop',22)}</div>
+    <div class="hello">
+      <b>Halo, Tim Monitoring</b>
+      <span>${fmtDate(t)}, <em>${todayStores} kunjungan toko hari ini</em></span>
+    </div>
+    <button class="pill-btn" id="tbRefresh" type="button" aria-label="Muat ulang data">${icon('refresh',18,2)}<span>Muat ulang</span></button>
+    <button class="pill-btn" id="tbExport" type="button" aria-label="Ekspor data">${icon('download',18,2)}<span>Ekspor</span></button>
+    ${sb?'<button class="pill-btn" id="tbLogout" type="button">Keluar</button>':''}
+    <button class="round-btn dark" id="tbAdd" type="button" aria-label="Catat kunjungan baru" title="Catat kunjungan baru">${icon('plus',20,2.2)}</button>
+    <div class="avatar" aria-hidden="true">JN</div>
+  `;
+  document.getElementById('tbRefresh').addEventListener('click', ()=>{ initData().then(()=>toast('Data dimuat ulang')); });
+  document.getElementById('tbExport').addEventListener('click', exportData);
+  const lo = document.getElementById('tbLogout'); if(lo) lo.addEventListener('click', async ()=>{ await sb.auth.signOut(); location.reload(); });
+  document.getElementById('tbAdd').addEventListener('click', ()=>{ currentRoute='harian'; renderNav(); renderMain(); window.scrollTo({top:0}); });
+}
+
+/* ================= Nav / routing ================= */
+const ROUTES = [
+  {id:'dashboard', label:'Dashboard', icon:'dashboard'},
+  {id:'harian', label:'Kunjungan Harian', icon:'harian'},
+  {id:'database', label:'Database Toko', icon:'database'},
+  {id:'direktori', label:'Direktori Jogja & Solo', icon:'pin'},
+  {id:'tester', label:'Open Tester', icon:'tester'},
+  {id:'sr', label:'Kelola SR & Area', icon:'sr'},
+];
+let currentRoute = 'dashboard';
+
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = ROUTES.map(r => `<button type="button" data-route="${r.id}" data-label="${esc(r.label)}" aria-label="${esc(r.label)}" ${currentRoute===r.id?'aria-current="page"':''} class="${currentRoute===r.id?'active':''}">${icon(r.icon,22)}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { currentRoute = b.dataset.route; renderNav(); renderMain(); window.scrollTo({top:0}); }));
+}
+
+function renderMain(){
+  renderTopbar();
+  const main = document.getElementById('main');
+  if(currentRoute==='dashboard') return renderDashboard(main);
+  if(currentRoute==='harian') return renderHarian(main);
+  if(currentRoute==='direktori') return renderDirektori(main);
+  if(currentRoute==='database') return renderDatabase(main);
+  if(currentRoute==='tester') return renderTester(main);
+  if(currentRoute==='sr') return renderSR(main);
+}
+
+function srName(id){ if(!id) return '—'; const s = DATA.sr.find(x=>x.id===id); return s ? s.name : '(SR terhapus)'; }
+function srOptionsHtml(selected){
+  if(DATA.sr.length===0) return '<option value="">Belum ada SR</option>';
+  return DATA.sr.map(s=>`<option value="${s.id}" ${s.id===selected?'selected':''}>${s.name} — ${s.area}</option>`).join('');
+}
+
+/* ================= DASHBOARD ================= */
+let dashChart = null;
+
+function sparkPath(vals, w, h){
+  const pad = 3;
+  if(!vals || vals.length < 2) return `M${pad} ${h-pad} L${w-pad} ${h-pad}`;
+  const max = Math.max(...vals, 1), n = vals.length;
+  const pts = vals.map((v,i)=>[pad + i*(w-2*pad)/(n-1), h - pad - (v/max)*(h-2*pad)]);
+  let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for(let i=1;i<n;i++){
+    const [x0,y0] = pts[i-1], [x1,y1] = pts[i], cx = (x0+x1)/2;
+    d += ` C${cx.toFixed(1)} ${y0.toFixed(1)}, ${cx.toFixed(1)} ${y1.toFixed(1)}, ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+  }
+  return d;
+}
+
+function juiceMascot(){
+  return `<svg viewBox="0 0 200 170" role="img" aria-label="Ilustrasi gelas jus dengan kacamata">
+    <ellipse cx="100" cy="158" rx="50" ry="6" fill="rgba(60,50,120,.10)"/>
+    <path d="M100 58C96 40 84 30 68 26c1 16 14 28 32 32z" fill="#6FBF5B"/>
+    <path d="M112 60 128 18h20" fill="none" stroke="#7A66E8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M56 64h88l-13 80q-1.5 9-10 9H79q-8.500 0-10-9z" fill="#FF9F43"/>
+    <path d="M69 74l7 62" stroke="#FFD3A1" stroke-width="6" stroke-linecap="round" opacity=".85"/>
+    <rect x="50" y="56" width="100" height="11" rx="5.500" fill="#FFE3B8"/>
+    <g transform="translate(148 62)">
+      <circle r="16" fill="#FF8A3D"/><circle r="12.500" fill="#FFC46B"/>
+      <path d="M-11 0H11M0-11V11M-8-8 8 8M8-8-8 8" stroke="#FFE7BE" stroke-width="1.600" stroke-linecap="round"/>
+    </g>
+    <circle cx="84" cy="102" r="12" fill="#fff" fill-opacity=".65" stroke="#E5533D" stroke-width="3"/>
+    <circle cx="116" cy="102" r="12" fill="#fff" fill-opacity=".65" stroke="#E5533D" stroke-width="3"/>
+    <path d="M96 101h8" stroke="#E5533D" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="84" cy="103" r="2.800" fill="#2A2340"/><circle cx="116" cy="103" r="2.800" fill="#2A2340"/>
+    <path d="M92 124q8 8 16 0" fill="none" stroke="#2A2340" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="72" cy="118" r="4.500" fill="#FF6F4F" opacity=".45"/><circle cx="128" cy="118" r="4.500" fill="#FF6F4F" opacity=".45"/>
+    <path d="M40 40l2.500 6 6 2.500-6 2.500-2.500 6-2.500-6-6-2.500 6-2.500z" fill="#FFD24D"/>
+    <path d="M172 112l2 4.500 4.500 2-4.500 2-2 4.500-2-4.500-4.500-2 4.500-2z" fill="#FFD24D"/>
+    <text x="10" y="80" font-size="13" font-weight="800" fill="#E5533D" transform="rotate(-10 10 80)" font-family="inherit">Vit C</text>
+  </svg>`;
+}
+
+function renderDashboard(main){
+  const months = Array.from(new Set(DATA.visits.map(v=>monthKey(v.date)))).sort().reverse();
+  const currentMonth = monthKey(todayStr());
+  if(!months.includes(currentMonth)) months.unshift(currentMonth);
+  if(!window._dashMonth || !months.includes(window._dashMonth)) window._dashMonth = currentMonth;
+  if(!window._dashSR || (window._dashSR!=='all' && !DATA.sr.some(s=>s.id===window._dashSR))) window._dashSR = 'all';
+
+  const TARGET_SR = 130, TARGET_DAY = 5;
+  const filterSR = window._dashSR;
+  const mVisits = DATA.visits.filter(v => monthKey(v.date)===window._dashMonth && (filterSR==='all' || v.srId===filterSR));
+  const srConsidered = filterSR==='all' ? DATA.sr : DATA.sr.filter(s=>s.id===filterSR);
+  const totalStoreVisits = mVisits.reduce((a,v)=>a+(v.stores?v.stores.length:0),0);
+  const target = TARGET_SR * (srConsidered.length || 1);
+  const pct = target ? Math.round((totalStoreVisits/target)*100) : 0;
+  const distinctDays = new Set(mVisits.map(v=>v.date)).size;
+  const avgPerDay = distinctDays ? (totalStoreVisits/distinctDays).toFixed(1) : '0.0';
+  const absenDays = mVisits.filter(v=>v.absen).length;
+  const absenPct = mVisits.length ? Math.round((absenDays/mVisits.length)*100) : 0;
+  const todayVisits = DATA.visits.filter(v=>v.date===todayStr());
+
+  /* deret harian untuk sparkline */
+  const byDate = {};
+  mVisits.forEach(v=>{ byDate[v.date] = (byDate[v.date]||0) + (v.stores?v.stores.length:0); });
+  const daily = Object.keys(byDate).sort().map(d=>byDate[d]);
+  let run = 0; const cumul = daily.map(n=>run+=n);
+
+  /* rekap per SR */
+  const perSR = DATA.sr.map(s=>{
+    const sv = DATA.visits.filter(v=>v.srId===s.id && monthKey(v.date)===window._dashMonth);
+    const total = sv.reduce((a,v)=>a+(v.stores?v.stores.length:0),0);
+    const ad = sv.filter(v=>v.absen).length;
+    return { s, total, days: sv.length, p: Math.round((total/TARGET_SR)*100), ap: sv.length ? Math.round((ad/sv.length)*100) : 0 };
+  });
+  const spotList = filterSR==='all' ? perSR : perSR.filter(x=>x.s.id===filterSR);
+  const top = spotList.slice().sort((a,b)=>b.total-a.total)[0];
+
+  const kpiCard = (cls, ic, label, numHtml, dCls, dTxt, foot) => `
+    <div class="kpi ${cls}">
+      <div class="kpi-top"><span class="kpi-ico">${icon(ic,16,2)}</span><span>${label}</span></div>
+      <div class="num">${numHtml}</div>
+      <div class="kpi-foot">${foot}<span class="delta ${dCls}">${dTxt}</span></div>
+    </div>`;
+  const spark = vals => `<svg class="spark" viewBox="0 0 88 34" preserveAspectRatio="none" aria-hidden="true"><path d="${sparkPath(vals,88,34)}"/></svg>`;
+  const extraSR = Math.max(DATA.sr.length - 4, 0);
+  const stack = `<span class="stack">${DATA.sr.slice(0,4).map((s,i)=>`<span class="av t${i%4}" title="${esc(s.name)}">${esc(initials(s.name))}</span>`).join('')}${extraSR?`<span class="av t1">+${extraSR}</span>`:''}</span>`;
+
+  /* kartu sorotan */
+  const C = 2*Math.PI*28;
+  let spotHtml;
+  if(top){
+    const dash = C * Math.min(Math.max(top.p,0),100) / 100;
+    spotHtml = `
+      <div class="spot-head"><h2>Sorotan bulan ini</h2>${top.total>0 ? `<span class="rank">${filterSR==='all'?'Peringkat 1':'Dipilih'}</span>` : ''}</div>
+      <div class="spot-art">${juiceMascot()}</div>
+      <div class="spot-body">
+        <div>
+          <h3>${esc(top.s.name)}</h3>
+          <p>${top.total>0 ? `${esc(top.s.area)}. ${top.p}% dari target ${TARGET_SR} kunjungan.` : `${esc(top.s.area)}. Belum ada kunjungan tercatat bulan ini.`}</p>
+        </div>
+        <div class="ring" role="img" aria-label="Capaian ${top.p}%">
+          <svg viewBox="0 0 68 68" aria-hidden="true"><circle class="trk" cx="34" cy="34" r="28" fill="none" stroke-width="7"/>${dash>0?`<circle class="val" cx="34" cy="34" r="28" fill="none" stroke-width="7" stroke-dasharray="${dash.toFixed(1)} ${C.toFixed(1)}"/>`:''}</svg>
+          <b>${top.p}%</b>
+        </div>
+      </div>
+      <div class="spot-stats">
+        <div class="spot-stat"><b>${top.total}</b><span>Toko dikunjungi</span></div>
+        <div class="spot-stat"><b>${top.days}</b><span>Hari tercatat</span></div>
+      </div>`;
+  } else {
+    spotHtml = `
+      <div class="spot-head"><h2>Sorotan bulan ini</h2></div>
+      <div class="spot-art">${juiceMascot()}</div>
+      <div class="spot-body"><div><h3>Belum ada SR</h3><p>Tambahkan Sales Representative untuk mulai memantau kunjungan.</p></div></div>
+      <button class="btn primary" type="button" data-go="sr">Tambah SR</button>`;
+  }
+
+  main.innerHTML = `
+    <header class="page">
+      <div>
+        <h1>Dashboard</h1>
+        <div class="sub">Rekap kunjungan dan progres target Sales Representative</div>
+      </div>
+      <div class="chips">
+        <label class="chip blue"><span class="sr-only">Bulan</span><select id="fMonth">${months.map(m=>`<option value="${m}" ${m===window._dashMonth?'selected':''}>${monthLabel(m)}</option>`).join('')}</select></label>
+        <label class="chip orange"><span class="sr-only">Sales Representative</span><select id="fSR"><option value="all" ${filterSR==='all'?'selected':''}>Semua SR</option>${DATA.sr.map(s=>`<option value="${s.id}" ${s.id===filterSR?'selected':''}>${esc(s.name)}</option>`).join('')}</select></label>
+      </div>
+    </header>
+
+    ${!dbApi ? '<div class="banner">Data saat ini tersimpan lokal di browser masing-masing pengguna. Untuk data yang benar-benar dibagikan real-time ke semua SR setelah di-deploy, sambungkan backend (Firebase/Supabase/API sendiri) menggantikan penyimpanan lokal ini.</div>' : ''}
+
+    <div class="dash">
+      <div class="dash-main">
+        <div class="kpis">
+          ${kpiCard('peach','database','Kunjungan toko bulan ini', `${totalStoreVisits}<small>/ ${target}</small>`, pct>=100?'good':pct>=70?'warn':'bad', `${pct}% dari target`, spark(cumul))}
+          ${kpiCard('lilac','bars','Rata-rata kunjungan per hari', `${avgPerDay}`, parseFloat(avgPerDay)>=TARGET_DAY?'good':'warn', `Target ${TARGET_DAY} per hari`, spark(daily))}
+          ${kpiCard('sky','check','Kehadiran dari hari tercatat', `${absenPct}<small>%</small>`, absenPct>=95?'good':absenPct>=80?'warn':'bad', `${absenDays}/${mVisits.length} hari`, `<span class="bar" aria-hidden="true"><i style="width:${absenPct}%"></i></span>`)}
+          ${kpiCard('mint','sr','Total SR aktif', `${DATA.sr.length}`, 'good', `${DATA.storedb.length} toko terdata`, stack)}
+        </div>
+
+        <div class="split">
+          <section class="panel">
+            <h2>Capaian per SR, ${monthLabel(window._dashMonth)}</h2>
+            ${spotList.length===0 ? '<div class="empty">Belum ada SR. Tambahkan lewat menu Kelola SR &amp; Area.</div>' : '<div class="chart-wrap"><canvas id="srChart" aria-label="Grafik capaian kunjungan per SR" role="img"></canvas></div>'}
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h2>Kunjungan hari ini</h2><span class="muted">${fmtDate(todayStr())}</span></div>
+            ${DATA.sr.length===0 ? '<div class="empty">Tambahkan SR dulu di menu Kelola SR &amp; Area.</div>' :
+              `<div class="today-list">${DATA.sr.map((s,i)=>{
+                const v = todayVisits.find(x=>x.srId===s.id);
+                const count = v ? v.stores.length : 0;
+                const ok = count>=TARGET_DAY;
+                return `<div class="today-row">
+                  <span class="av t${i%4}">${esc(initials(s.name))}</span>
+                  <span class="nm">${esc(s.name)}<small>${esc(s.area)}</small></span>
+                  <span class="tag ${ok?'on':'off'}">${count}/${TARGET_DAY} toko</span>
+                </div>`;
+              }).join('')}</div>`}
+          </section>
+        </div>
+
+        <section class="panel">
+          <h2>Rincian per SR, ${monthLabel(window._dashMonth)}</h2>
+          <table>
+            <thead><tr><th>SR</th><th>Area</th><th>Kunjungan</th><th>Target</th><th>Capaian</th><th>Hari tercatat</th><th>Kehadiran</th></tr></thead>
+            <tbody>
+            ${perSR.length===0 ? `<tr><td colspan="7" class="empty">Belum ada data SR.</td></tr>` :
+              perSR.map(r=>`<tr>
+                <td><strong>${esc(r.s.name)}</strong></td>
+                <td>${esc(r.s.area)}</td>
+                <td>${r.total}</td>
+                <td>${TARGET_SR}</td>
+                <td><span class="tag ${r.p>=100?'on':r.p>=70?'warn':'off'}">${r.p}%</span></td>
+                <td>${r.days}</td>
+                <td>${r.ap}%</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </section>
+      </div>
+
+      <aside class="spot">${spotHtml}</aside>
+    </div>
+  `;
+
+  document.getElementById('fMonth').addEventListener('change', e=>{ window._dashMonth = e.target.value; renderDashboard(main); });
+  document.getElementById('fSR').addEventListener('change', e=>{ window._dashSR = e.target.value; renderDashboard(main); });
+  main.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click', ()=>{ currentRoute = b.dataset.go; renderNav(); renderMain(); window.scrollTo({top:0}); }));
+
+  /* grafik */
+  if(dashChart){ dashChart.destroy(); dashChart = null; }
+  const ctx = document.getElementById('srChart');
+  if(ctx && spotList.length){
+    const cs = getComputedStyle(document.documentElement);
+    const cv = n => cs.getPropertyValue(n).trim();
+    Chart.defaults.font.family = "'Plus Jakarta Sans',system-ui,sans-serif";
+    Chart.defaults.color = cv('--text-soft');
+    dashChart = new Chart(ctx, {
+      type:'bar',
+      data:{
+        labels: spotList.map(x=>x.s.name),
+        datasets:[
+          {label:'Kunjungan aktual', data: spotList.map(x=>x.total), backgroundColor: cv('--violet'), borderRadius:10, borderSkipped:false},
+          {label:`Target (${TARGET_SR})`, data: spotList.map(()=>TARGET_SR), backgroundColor: cv('--highlight'), borderRadius:10, borderSkipped:false}
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        categoryPercentage:.7, barPercentage:.85,
+        plugins:{ legend:{position:'bottom', labels:{usePointStyle:true, pointStyle:'circle', boxWidth:8, boxHeight:8, padding:16, font:{size:11.5}}} },
+        scales:{ x:{grid:{display:false}, border:{display:false}}, y:{grid:{color:cv('--line')}, border:{display:false}, beginAtZero:true} }
+      }
+    });
+  }
+}
+
+/* ================= KUNJUNGAN HARIAN ================= */
+/* ================= BUKTI ABSEN: FOTO + LOKASI ================= */
+/* Foto disimpan di IndexedDB (bukan localStorage) agar tidak cepat penuh. */
+const previewCache = {};
+function idb(){ return new Promise((res,rej)=>{ if(idb.db) return res(idb.db); const r=indexedDB.open('smp_photos',1); r.onupgradeneeded=()=>r.result.createObjectStore('p'); r.onsuccess=()=>{ idb.db=r.result; res(idb.db); }; r.onerror=()=>rej(r.error); }); }
+async function idbPut(id,data){ const db=await idb(); return new Promise((res,rej)=>{ const t=db.transaction('p','readwrite'); t.objectStore('p').put(data,id); t.oncomplete=res; t.onerror=()=>rej(t.error); }); }
+async function idbGet(id){ const db=await idb(); return new Promise((res,rej)=>{ const r=db.transaction('p').objectStore('p').get(id); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function idbDel(id){ const db=await idb(); return new Promise(res=>{ const t=db.transaction('p','readwrite'); t.objectStore('p').delete(id); t.oncomplete=res; t.onerror=res; }); }
+async function photoPut(id,data){
+  if(sb){
+    const blob = await (await fetch(data)).blob();
+    const r = await sb.storage.from('smp-bukti').upload(id+'.jpg', blob, {contentType:'image/jpeg', upsert:true});
+    if(r.error) throw r.error;
+  }
+  await idbPut(id,data);
+}
+async function photoGet(id){
+  const local = await idbGet(id); if(local) return local;
+  if(sb){
+    const r = await sb.storage.from('smp-bukti').download(id+'.jpg');
+    if(r.data){
+      const url = await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(r.data); });
+      idbPut(id,url); return url;
+    }
+  }
+}
+async function photoDel(id){ await idbDel(id); if(sb) sb.storage.from('smp-bukti').remove([id+'.jpg']); }
+async function photoAll(){ const db=await idb(); return new Promise(res=>{ const out={}; const r=db.transaction('p').objectStore('p').openCursor(); r.onsuccess=()=>{ const c=r.result; if(c){ out[c.key]=c.value; c.continue(); } else res(out); }; r.onerror=()=>res(out); }); }
+
+function getGeo(){
+  return new Promise(res=>{
+    if(!navigator.geolocation) return res({err:'GPS tidak tersedia di perangkat ini'});
+    navigator.geolocation.getCurrentPosition(
+      p=>res({lat:+p.coords.latitude.toFixed(6), lng:+p.coords.longitude.toFixed(6), acc:Math.round(p.coords.accuracy)}),
+      e=>res({err: e.code===1 ? 'Izin lokasi ditolak' : 'Lokasi belum terdeteksi'}),
+      {enableHighAccuracy:true, timeout:15000, maximumAge:0});
+  });
+}
+function evText(ev){ return `${ev.lat}, ${ev.lng} (±${ev.acc} m) — ${new Date(ev.ts).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})}`; }
+function stampFrame(src, label, g, ts){
+  const sc = Math.min(1, 900/src.width), w = Math.round(src.width*sc), h = Math.round(src.height*sc);
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  const x = c.getContext('2d'); x.drawImage(src,0,0,w,h);
+  const fs = Math.max(13, Math.round(w/42)), bh = fs*3.2;
+  x.fillStyle='rgba(0,0,0,.62)'; x.fillRect(0,h-bh,w,bh);
+  x.fillStyle='#fff'; x.textBaseline='top';
+  x.font = `600 ${fs}px sans-serif`; x.fillText(label, 10, h-bh+fs*.4);
+  x.font = `${fs}px sans-serif`;
+  x.fillText(ts.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'medium'}), 10, h-bh+fs*1.5);
+  x.fillText(`${g.lat}, ${g.lng} (±${g.acc} m)`, 10, h-bh+fs*2.4);
+  return c.toDataURL('image/jpeg',0.6);
+}
+/* Kamera langsung (getUserMedia): tanpa akses galeri, foto lama tidak bisa dipakai. */
+function captureEvidence(label, cb){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ toast('Kamera tidak tersedia. Buka lewat HTTPS di browser HP'); return; }
+  getGeo(); // pancing izin lokasi lebih awal
+  const ov = document.createElement('div'); ov.className='evmodal';
+  ov.innerHTML = `<div class="evcard" role="dialog" aria-modal="true"><div class="panel-head"><h2>Ambil foto bukti</h2><button class="btn ghost small" type="button" id="camCancel">Batal</button></div><video id="camVideo" playsinline muted autoplay style="width:100%;border-radius:14px;background:#000"></video><div class="evmeta" style="margin:8px 0">${esc(label)}</div><button class="btn primary" type="button" id="camShot" disabled>Ambil foto</button></div>`;
+  document.body.appendChild(ov);
+  let stream = null;
+  const stop = ()=>{ if(stream) stream.getTracks().forEach(t=>t.stop()); ov.remove(); };
+  ov.querySelector('#camCancel').addEventListener('click', stop);
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}, audio:false}).then(st=>{
+    stream = st; const v = ov.querySelector('#camVideo'); v.srcObject = st;
+    v.onloadedmetadata = ()=>{ v.play(); ov.querySelector('#camShot').disabled = false; };
+  }).catch(()=>{ stop(); toast('Izin kamera ditolak atau kamera tidak tersedia'); });
+  ov.querySelector('#camShot').addEventListener('click', async ()=>{
+    const v = ov.querySelector('#camVideo'), btn = ov.querySelector('#camShot');
+    if(!v.videoWidth) return;
+    btn.disabled = true; btn.textContent = 'Membaca lokasi…';
+    const ts = new Date(), snap = document.createElement('canvas');
+    snap.width = v.videoWidth; snap.height = v.videoHeight; snap.getContext('2d').drawImage(v,0,0);
+    const g = await getGeo();
+    if(g.err){ btn.disabled = false; btn.textContent = 'Ambil foto'; toast(g.err+'. Aktifkan GPS lalu ulangi'); return; }
+    try{
+      const data = stampFrame(snap, label, g, ts), id = uid();
+      await photoPut(id, data); previewCache[id] = data;
+      cb({photoId:id, lat:g.lat, lng:g.lng, acc:g.acc, ts:ts.toISOString()});
+      stop(); toast('Bukti foto dan lokasi tersimpan');
+    }catch(e){ btn.disabled = false; btn.textContent = 'Ambil foto'; toast('Gagal menyimpan foto, ulangi'); }
+  });
+}
+function renderEvBox(el, ev, getLabel, onSet){
+  if(!el) return;
+  el.innerHTML = ev
+    ? `<img class="evthumb" src="${previewCache[ev.photoId]||''}" alt="Foto bukti"><div class="evmeta"><b>Bukti terekam</b><br>${evText(ev)}</div><button type="button" class="btn ghost small">Ambil ulang</button>`
+    : `<button type="button" class="btn ghost small">Ambil foto dan lokasi</button><span class="evmeta">Wajib: foto langsung dari kamera dan GPS aktif</span>`;
+  el.querySelector('button').addEventListener('click', ()=>{
+    const lb = getLabel(); if(!lb) return;
+    captureEvidence(lb, e=>{ onSet(e); renderEvBox(el, e, getLabel, onSet); });
+  });
+}
+async function showEvidence(visitId){
+  const v = DATA.visits.find(x=>x.id===visitId); if(!v) return;
+  const items = []; if(v.absenEvidence) items.push(['Absen masuk', v.absenEvidence]);
+  (v.stores||[]).forEach(s=>{ if(s.evidence) items.push([s.storeName, s.evidence]); });
+  const ov = document.createElement('div'); ov.className='evmodal';
+  ov.innerHTML = `<div class="evcard" role="dialog" aria-modal="true"><div class="panel-head"><h2>Bukti ${esc(srName(v.srId))}, ${fmtDate(v.date)}</h2><button class="btn ghost small" type="button" id="evClose">Tutup</button></div><div id="evList">${items.length?'':'<div class="empty">Tidak ada bukti pada kunjungan ini.</div>'}</div></div>`;
+  document.body.appendChild(ov);
+  const close = ()=>ov.remove();
+  ov.querySelector('#evClose').addEventListener('click', close);
+  ov.addEventListener('click', e=>{ if(e.target===ov) close(); });
+  const list = ov.querySelector('#evList');
+  for(const [name, ev] of items){
+    const d = document.createElement('div'); d.className='evitem';
+    d.innerHTML = `<b>${esc(name)}</b><img alt="Foto bukti ${esc(name)}"><div class="evmeta">${evText(ev)} — <a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${ev.lat},${ev.lng}">Lihat di Maps</a></div>`;
+    list.appendChild(d);
+    photoGet(ev.photoId).then(data=>{ if(data) d.querySelector('img').src = data; else d.querySelector('img').remove(); });
+  }
+}
+
+let draftStores = [];
+let draftAbsenEv = null;
+function renderHarian(main){
+  main.innerHTML = `
+    <header class="page">
+      <div><h1>Input Kunjungan Harian</h1><div class="sub">Absensi, stock opname distributor, dan kunjungan toko per SR</div></div>
+    </header>
+
+    <div class="panel">
+      <h2>Catat Hari Ini / Tanggal Tertentu</h2>
+      <div class="row">
+        <div class="field"><label>Sales Representative</label><select id="hSR">${srOptionsHtml()}</select></div>
+        <div class="field"><label>Tanggal</label><input type="date" id="hDate" value="${todayStr()}"></div>
+      </div>
+      <div class="row">
+        <div class="checkline"><input type="checkbox" id="hAbsen" checked><label style="margin:0;" for="hAbsen">Absen masuk</label></div>
+        <div class="checkline"><input type="checkbox" id="hStockOpname"><label style="margin:0;" for="hStockOpname">Stock opname di distributor</label></div>
+        <div class="checkline"><input type="checkbox" id="hDistVisit"><label style="margin:0;" for="hDistVisit">Kunjungi distributor (wajib 1x/minggu)</label></div>
+      </div>
+      <div class="evbox" id="absenEv"></div>
+
+      <h2 style="margin-top:18px;">Toko yang Dikunjungi</h2>
+      <div id="storeEntries"></div>
+      <button class="btn ghost small" id="addStoreEntry">+ Tambah Toko</button>
+
+      <div style="margin-top:18px;">
+        <button class="btn primary" id="saveVisit">Simpan Kunjungan Hari Ini</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Riwayat Kunjungan</h2></div>
+      <table>
+        <thead><tr><th>Tanggal</th><th>SR</th><th>Absen</th><th>Jml Toko</th><th>Distributor</th><th>Bukti</th><th></th></tr></thead>
+        <tbody id="visitHistory"></tbody>
+      </table>
+    </div>
+  `;
+  draftStores = []; draftAbsenEv = null;
+  renderEvBox(document.getElementById('absenEv'), null, ()=>{
+    const sr = document.getElementById('hSR').value;
+    if(!sr){ toast('Pilih SR dulu'); return null; }
+    return srName(sr)+' | Absen masuk';
+  }, e=>{ draftAbsenEv = e; });
+  renderStoreEntries();
+  document.getElementById('addStoreEntry').addEventListener('click', ()=>{
+    draftStores.push({id:uid(), storeName:'', cekStok:false, takingOrder:false, branding:false, tester:false, evidence:null});
+    renderStoreEntries();
+  });
+  document.getElementById('saveVisit').addEventListener('click', saveVisitEntry);
+  renderVisitHistory();
+}
+
+function renderStoreEntries(){
+  const wrap = document.getElementById('storeEntries');
+  if(draftStores.length===0){ wrap.innerHTML = '<div class="empty">Belum ada toko ditambahkan.</div>'; return; }
+  wrap.innerHTML = draftStores.map((s,i)=>`
+    <div class="store-entry" data-i="${i}">
+      <div class="top">
+        <input type="text" placeholder="Nama toko" value="${s.storeName}" style="max-width:260px;" data-field="storeName">
+        <button class="btn danger small" data-remove="${i}">Hapus</button>
+      </div>
+      <div class="chips">
+        <div class="checkline"><input type="checkbox" data-field="cekStok" ${s.cekStok?'checked':''}> Cek stok</div>
+        <div class="checkline"><input type="checkbox" data-field="takingOrder" ${s.takingOrder?'checked':''}> Taking order</div>
+        <div class="checkline"><input type="checkbox" data-field="branding" ${s.branding?'checked':''}> Branding toko</div>
+        <div class="checkline"><input type="checkbox" data-field="tester" ${s.tester?'checked':''}> Maintain tester</div>
+      </div>
+      <div class="evbox" data-ev="${i}"></div>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('.store-entry').forEach(el=>{
+    const i = parseInt(el.dataset.i);
+    renderEvBox(el.querySelector('[data-ev]'), draftStores[i].evidence, ()=>{
+      const sr = document.getElementById('hSR').value, n = draftStores[i].storeName.trim();
+      if(!sr || !n){ toast('Pilih SR dan isi nama toko dulu'); return null; }
+      return srName(sr)+' | '+n;
+    }, e=>{ draftStores[i].evidence = e; });
+    el.querySelector('[data-field="storeName"]').addEventListener('input', e=>draftStores[i].storeName = e.target.value);
+    el.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+      cb.addEventListener('change', e=>draftStores[i][e.target.dataset.field] = e.target.checked);
+    });
+  });
+  wrap.querySelectorAll('[data-remove]').forEach(b=>{
+    b.addEventListener('click', ()=>{ draftStores.splice(parseInt(b.dataset.remove),1); renderStoreEntries(); });
+  });
+}
+
+async function saveVisitEntry(){
+  const srId = document.getElementById('hSR').value;
+  const date = document.getElementById('hDate').value;
+  if(!srId){ toast('Tambahkan SR terlebih dahulu'); return; }
+  if(!date){ toast('Pilih tanggal'); return; }
+  const filled = draftStores.filter(s=>s.storeName.trim()!=='');
+  if(document.getElementById('hAbsen').checked && !draftAbsenEv){ toast('Bukti foto dan lokasi absen masuk belum ada'); return; }
+  const noEv = filled.find(s=>!s.evidence);
+  if(noEv){ toast('Bukti foto dan lokasi toko "'+noEv.storeName.trim()+'" belum ada'); return; }
+  const btn = document.getElementById('saveVisit'); btn.disabled = true; btn.textContent = 'Menyimpan…';
+  const existing = DATA.visits.find(v=>v.srId===srId && v.date===date);
+  const record = {
+    srId, date,
+    absen: document.getElementById('hAbsen').checked,
+    stockOpnameDistributor: document.getElementById('hStockOpname').checked,
+    distributorVisitWeekly: document.getElementById('hDistVisit').checked,
+    stores: filled,
+    absenEvidence: draftAbsenEv || null
+  };
+  await writeRecord('visits', existing ? existing.id : null, record);
+  btn.disabled = false; btn.textContent = 'Simpan Kunjungan Hari Ini';
+  toast('Kunjungan tersimpan');
+  if(!dbApi) renderHarian(document.getElementById('main'));
+}
+
+function renderVisitHistory(){
+  const tbody = document.getElementById('visitHistory');
+  if(!tbody) return;
+  const sorted = [...DATA.visits].sort((a,b)=> b.date.localeCompare(a.date));
+  if(sorted.length===0){ tbody.innerHTML = '<tr><td colspan="7" class="empty">Belum ada riwayat.</td></tr>'; return; }
+  tbody.innerHTML = sorted.slice(0,60).map(v=>`
+    <tr>
+      <td>${fmtDate(v.date)}</td>
+      <td>${srName(v.srId)}</td>
+      <td><span class="tag ${v.absen?'on':'off'}">${v.absen?'Hadir':'Absen'}</span></td>
+      <td>${v.stores.length}</td>
+      <td><span class="tag ${v.distributorVisitWeekly?'on':'off'}">${v.distributorVisitWeekly?'Ya':'Belum'}</span></td>
+      <td>${(v.absenEvidence||v.stores.some(s=>s.evidence))?`<button class="btn ghost small" data-ev="${v.id}">Lihat bukti</button>`:'<span class="tag off">Tidak ada</span>'}</td>
+      <td><button class="btn danger small" data-del="${v.id}">Hapus</button></td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('[data-ev]').forEach(b=>b.addEventListener('click', ()=>showEvidence(b.dataset.ev)));
+  tbody.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', async ()=>{
+    const vv = DATA.visits.find(x=>x.id===b.dataset.del);
+    await deleteRecord('visits', b.dataset.del);
+    if(vv && !DATA.visits.find(x=>x.id===vv.id)){ const ids=[vv.absenEvidence, ...(vv.stores||[]).map(s=>s.evidence)].filter(Boolean).map(e=>e.photoId); ids.forEach(photoDel); }
+    if(!dbApi) renderVisitHistory();
+  }));
+}
+
+/* ================= DATABASE TOKO ================= */
+function renderDatabase(main){
+  main.innerHTML = `
+    <header class="page">
+      <div><h1>Database Toko</h1><div class="sub">Pendataan lengkap per toko — stok, kompetitor, dan omzet</div></div>
+    </header>
+    <div class="panel">
+      <h2>Tambah / Perbarui Data Toko</h2>
+      <div class="row">
+        <div class="field"><label>Sales Representative</label><select id="dSR">${srOptionsHtml()}</select></div>
+        <div class="field"><label>Nama Toko</label><input type="text" id="dStore" placeholder="Nama toko"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Ketersediaan Stok JNC/JR</label><input type="text" id="dStok" placeholder="mis. Tersedia lengkap"></div>
+        <div class="field"><label>Distributor Pengambilan Stok</label><input type="text" id="dDistributor"></div>
+        <div class="field"><label>Restok Quantity</label><input type="text" id="dRestok"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Produk Laku JNC/JR</label><input type="text" id="dLaku"></div>
+        <div class="field"><label>Top 5 Produk Kompetitor</label><input type="text" id="dTop5"></div>
+        <div class="field"><label>Omzet Rata-rata Harian Toko</label><input type="text" id="dOmzet"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Stok Fast Moving</label><input type="text" id="dFast"></div>
+        <div class="field"><label>Stok Slow Moving</label><input type="text" id="dSlow"></div>
+        <div class="field"><label>Dead Stock</label><input type="text" id="dDead"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Program Toko Kompetitor</label><input type="text" id="dProgram"></div>
+        <div class="field"><label>Saran / Kendala ke Brand</label><input type="text" id="dSaran"></div>
+      </div>
+      <button class="btn primary" id="saveStore">Simpan Data Toko</button>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Daftar Toko Terdata (${DATA.storedb.length})</h2></div>
+      <table>
+        <thead><tr><th>Toko</th><th>SR</th><th>Stok JNC/JR</th><th>Omzet Harian</th><th>Update</th><th></th></tr></thead>
+        <tbody id="storeList"></tbody>
+      </table>
+    </div>
+  `;
+  document.getElementById('saveStore').addEventListener('click', async ()=>{
+    const srId = document.getElementById('dSR').value;
+    const storeName = document.getElementById('dStore').value.trim();
+    if(!srId || !storeName){ toast('Pilih SR dan isi nama toko'); return; }
+    const btn = document.getElementById('saveStore'); btn.disabled = true;
+    await writeRecord('storedb', null, {
+      srId, storeName,
+      stokJNC: document.getElementById('dStok').value,
+      distributor: document.getElementById('dDistributor').value,
+      restokQty: document.getElementById('dRestok').value,
+      produkLaku: document.getElementById('dLaku').value,
+      top5Kompetitor: document.getElementById('dTop5').value,
+      omzetHarian: document.getElementById('dOmzet').value,
+      fastMoving: document.getElementById('dFast').value,
+      slowMoving: document.getElementById('dSlow').value,
+      deadStock: document.getElementById('dDead').value,
+      programKompetitor: document.getElementById('dProgram').value,
+      saranKendala: document.getElementById('dSaran').value,
+      updated: todayStr()
+    });
+    toast('Data toko tersimpan');
+    if(!dbApi) renderDatabase(main); else btn.disabled = false;
+  });
+  renderStoreList();
+}
+function renderStoreList(){
+  const tbody = document.getElementById('storeList');
+  if(!tbody) return;
+  const sorted = [...DATA.storedb].sort((a,b)=>(b.updated||'').localeCompare(a.updated||''));
+  if(sorted.length===0){ tbody.innerHTML='<tr><td colspan="6" class="empty">Belum ada data toko.</td></tr>'; return; }
+  tbody.innerHTML = sorted.map(s=>`
+    <tr>
+      <td><strong>${s.storeName}</strong>${s.programKompetitor?`<br><span style="color:var(--text-faint);font-size:11.5px;">Kompetitor: ${s.programKompetitor}</span>`:''}</td>
+      <td>${srName(s.srId)}</td>
+      <td>${s.stokJNC||'—'}</td>
+      <td>${s.omzetHarian||'—'}</td>
+      <td>${s.updated?fmtDate(s.updated):'—'}</td>
+      <td><button class="btn danger small" data-del="${s.id}">Hapus</button></td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', async ()=>{
+    await deleteRecord('storedb', b.dataset.del);
+    if(!dbApi) renderStoreList();
+  }));
+}
+
+/* ================= OPEN TESTER ================= */
+function renderTester(main){
+  main.innerHTML = `
+    <header class="page">
+      <div><h1>Open Tester / Event</h1><div class="sub">Rekap kegiatan tester di toko atau komunitas</div></div>
+    </header>
+    <div class="panel">
+      <h2>Catat Kegiatan Open Tester</h2>
+      <div class="row">
+        <div class="field"><label>Sales Representative</label><select id="tSR">${srOptionsHtml()}</select></div>
+        <div class="field"><label>Toko / Nama Event</label><input type="text" id="tName"></div>
+        <div class="field"><label>Tanggal</label><input type="date" id="tDate" value="${todayStr()}"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Ketersediaan Stok Penjualan</label><input type="text" id="tStok"></div>
+        <div class="field"><label>Jumlah Pengunjung Toko</label><input type="number" id="tPengunjung" min="0"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Pengunjung Coba Produk</label><input type="number" id="tCoba" min="0"></div>
+        <div class="field"><label>Pengunjung Beli Produk</label><input type="number" id="tBeli" min="0"></div>
+        <div class="field"><label>Pengeluaran Merchandise</label><input type="text" id="tMerch"></div>
+      </div>
+      <button class="btn primary" id="saveTester">Simpan Kegiatan</button>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Riwayat Open Tester</h2></div>
+      <table>
+        <thead><tr><th>Tanggal</th><th>Toko/Event</th><th>SR</th><th>Pengunjung</th><th>Coba → Beli</th><th></th></tr></thead>
+        <tbody id="testerList"></tbody>
+      </table>
+    </div>
+  `;
+  document.getElementById('saveTester').addEventListener('click', async ()=>{
+    const srId = document.getElementById('tSR').value;
+    const name = document.getElementById('tName').value.trim();
+    const date = document.getElementById('tDate').value;
+    if(!srId || !name || !date){ toast('Lengkapi SR, nama toko/event, dan tanggal'); return; }
+    const btn = document.getElementById('saveTester'); btn.disabled = true;
+    await writeRecord('tester', null, {
+      srId, name, date,
+      stok: document.getElementById('tStok').value,
+      pengunjung: parseInt(document.getElementById('tPengunjung').value)||0,
+      coba: parseInt(document.getElementById('tCoba').value)||0,
+      beli: parseInt(document.getElementById('tBeli').value)||0,
+      merch: document.getElementById('tMerch').value
+    });
+    toast('Kegiatan tersimpan');
+    if(!dbApi) renderTester(main); else btn.disabled = false;
+  });
+  renderTesterList();
+}
+function renderTesterList(){
+  const tbody = document.getElementById('testerList');
+  if(!tbody) return;
+  const sorted = [...DATA.tester].sort((a,b)=>b.date.localeCompare(a.date));
+  if(sorted.length===0){ tbody.innerHTML='<tr><td colspan="6" class="empty">Belum ada kegiatan tercatat.</td></tr>'; return; }
+  tbody.innerHTML = sorted.map(t=>`
+    <tr>
+      <td>${fmtDate(t.date)}</td>
+      <td>${t.name}</td>
+      <td>${srName(t.srId)}</td>
+      <td>${t.pengunjung}</td>
+      <td>${t.coba} → ${t.beli}</td>
+      <td><button class="btn danger small" data-del="${t.id}">Hapus</button></td>
+    </tr>
+  `).join('');
+  tbody.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', async ()=>{
+    await deleteRecord('tester', b.dataset.del);
+    if(!dbApi) renderTesterList();
+  }));
+}
+
+/* ================= KELOLA SR ================= */
+function renderSR(main){
+  main.innerHTML = `
+    <header class="page">
+      <div><h1>Kelola Sales Representative</h1><div class="sub">Daftar SR beserta area yang diwakilinya</div></div>
+    </header>
+
+    <div class="panel">
+      <h2>Tambah SR Baru</h2>
+      <div class="row">
+        <div class="field"><label>Nama SR</label><input type="text" id="srName"></div>
+        <div class="field"><label>Area / Kota</label><input type="text" id="srArea"></div>
+      </div>
+      <button class="btn primary" id="addSR">Tambah SR</button>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Daftar SR (${DATA.sr.length})</h2></div>
+      <table>
+        <thead><tr><th>Nama</th><th>Area</th><th>Kunjungan Tercatat</th><th>Toko Terdata</th><th></th></tr></thead>
+        <tbody id="srList"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>Cadangan Data</h2>
+      <div class="sub" style="margin-bottom:12px;">${dbApi ? 'Data sudah tersimpan bersama secara otomatis. Tetap disarankan mengunduh cadangan sesekali.' : 'Data tersimpan lokal di browser ini. Unduh cadangan secara berkala, atau pulihkan dari file cadangan.'}</div>
+      <div class="row">
+        <button class="btn ghost" id="exportBtn">Unduh Cadangan (JSON)</button>
+        ${!dbApi ? '<label class="btn ghost" style="cursor:pointer;">Pulihkan dari File<input type="file" id="importFile" accept="application/json" style="display:none;"></label>' : ''}
+      </div>
+    </div>
+  `;
+  document.getElementById('addSR').addEventListener('click', async ()=>{
+    const name = document.getElementById('srName').value.trim();
+    const area = document.getElementById('srArea').value.trim();
+    if(!name || !area){ toast('Isi nama dan area'); return; }
+    await writeRecord('sr', null, {name, area});
+    toast('SR ditambahkan');
+    if(!dbApi) renderSR(main); else { document.getElementById('srName').value=''; document.getElementById('srArea').value=''; }
+  });
+  renderSRList();
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  const importEl = document.getElementById('importFile');
+  if(importEl) importEl.addEventListener('change', importData);
+}
+function renderSRList(){
+  const tbody = document.getElementById('srList');
+  if(!tbody) return;
+  if(DATA.sr.length===0){ tbody.innerHTML='<tr><td colspan="5" class="empty">Belum ada SR.</td></tr>'; return; }
+  tbody.innerHTML = DATA.sr.map(s=>{
+    const vc = DATA.visits.filter(v=>v.srId===s.id).length;
+    const sc = DATA.storedb.filter(x=>x.srId===s.id).length;
+    return `<tr>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.area}</td>
+      <td>${vc} hari</td>
+      <td>${sc} toko</td>
+      <td><button class="btn danger small" data-del="${s.id}">Hapus</button></td>
+    </tr>`;
+  }).join('');
+  tbody.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', async ()=>{
+    if(confirm('Hapus SR ini? Data kunjungan & toko terkait tidak ikut terhapus otomatis.')){
+      await deleteRecord('sr', b.dataset.del);
+      if(!dbApi) renderSRList();
+    }
+  }));
+}
+
+/* ================= Export / Import ================= */
+async function exportData(){
+  const payload = JSON.stringify(Object.assign({}, DATA, {photos: await photoAll()}), null, 2);
+  const blob = new Blob([payload], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'store-monitoring-backup-'+todayStr()+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const parsed = JSON.parse(evt.target.result);
+      if(!confirm('Ini akan menimpa data yang ada sekarang. Lanjutkan?')) return;
+      DATA = { sr: parsed.sr||[], visits: parsed.visits||[], storedb: parsed.storedb||[], tester: parsed.tester||[], dirState: parsed.dirState||{}, dirCustom: parsed.dirCustom||[] };
+      if(parsed.photos) Object.keys(parsed.photos).forEach(k=>photoPut(k, parsed.photos[k]));
+      persistLocal(); toast('Data berhasil dipulihkan'); renderMain();
+    }catch(err){ toast('File tidak valid'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ================= DIREKTORI TOKO JOGJA & SOLO ================= */
+const DIR = [
+["Jogja Vape Lounge Tamsis","Yogyakarta","Mergangsan","Jl. Taman Siswa No. 138, Wirogunan","081335353502"],
+["Dr Vapor Paris","Yogyakarta","Mantrijeron","Jl. Parangtritis No. 141, Brontokusuman",""],
+["Morevapor Glagahsari","Yogyakarta","Umbulharjo","Jl. Glagahsari No. 98, Warungboto",""],
+["Becka Vapor","Yogyakarta","Mergangsan","Jl. Sisingamangaraja No. 83, Brontokusuman",""],
+["Krapyak Vapestore","Yogyakarta","Mantrijeron","Krapyak, Mantrijeron","085799095046"],
+["Banana Vapestore Jogja","Bantul","Banguntapan","Jl. Gedongkuning Selatan No. 8B, Pringgolayan",""],
+["Jogja Vape Lounge Perumnas","Sleman","Depok","Jl. Perumnas No. 89, Condongcatur","081335353502"],
+["Jogja Vape Lounge Pandega","Sleman","Depok","Jl. Pandega Karya No. 3, Caturtunggal",""],
+["Mitra Vape Jogja","Sleman","Depok","Jl. Perumnas, Caturtunggal",""],
+["Fatherhood Vape Store","Sleman","Depok","Jl. Gondang Raya No. 22, Condongcatur",""],
+["Galaxy Vape Jogja","Sleman","Depok","Jl. Anggajaya 1 No. 300, Condongcatur",""],
+["FOOM Store Yogyakarta","Sleman","Depok","Jl. Affandi No. 51, Santren, Caturtunggal",""],
+["Elvapor Yogyakarta","Sleman","Mlati","Jl. Monjali No. 89 A, Sinduadi",""],
+["Sovap Vapestore","Solo","Serengan","Jl. Gatot Subroto No. 279","082223025050"],
+["Zollow Vape Store","Solo","Banjarsari","Jl. Selamat Riyadi No. 38",""],
+["Omah Vapor Solo","Solo","Banjarsari","Jl. Ki Mangun Sarkoro No. 46, Nusukan",""],
+["Vape Holic Solo","Solo","Banjarsari","Jl. Kartini No. 55, Timuran",""],
+["Sky Vape Solo","Solo","Banjarsari","Jl. Agung Selatan No. 6, Mojosongo","081229870407"],
+["Rich Vapor Solo","Solo","Laweyan","Jl. Manggis V No. 9B, Jajar","081226502502"],
+["House Vapor Solo","Solo","Surakarta","Jl. Dr. Rajiman",""],
+["Vape Island Solo","Solo","Pasar Kliwon","Pasar Kliwon","081334908989"]
+];
+let dirF = {q:'', city:'', area:'', stat:'', brand:''};
+function allDir(){ return DIR.concat((DATA.dirCustom||[]).map(c=>[c.name,c.city,c.area,c.addr,c.phone,c.id])); }
+function dirInCity(d){ return !dirF.city || (dirF.city==='Solo' ? d[1]==='Solo' : d[1]!=='Solo'); }
+function dirAreas(){ return [...new Set(allDir().filter(dirInCity).map(d=>d[2]))].sort(); }
+
+function renderDirektori(main){
+  main.innerHTML = `
+    <header class="page">
+      <div><h1>Direktori Jogja & Solo</h1><div class="sub">Daftar vape store untuk survei — tandai kunjungan, lalu masukkan ke Database Toko</div></div>
+    </header>
+    <div class="panel">
+      <div class="dchips" id="dirCity"></div>
+      <div class="row">
+        <div class="field"><label for="dirQ">Cari toko / alamat</label><input type="search" id="dirQ" placeholder="mis. Condongcatur" value="${esc(dirF.q)}"></div>
+        <div class="field"><label for="dirArea">Kecamatan</label><select id="dirArea"></select></div>
+        <div class="field"><label for="dirStat">Status</label><select id="dirStat"><option value="">Semua</option><option value="0">Belum dikunjungi</option><option value="1">Sudah dikunjungi</option></select></div>
+        <div class="field"><label for="dirBrand">Brand di toko</label><select id="dirBrand"><option value="">Semua</option><option value="JNC">Sudah ada JNC</option><option value="JR">Sudah ada JR</option><option value="none">Belum ada keduanya</option></select></div>
+        <div class="field"><label for="dirSR">Masukkan ke database atas nama SR</label><select id="dirSR"><option value="">Tanpa SR</option>${srOptionsHtml()}</select></div>
+      </div>
+      <details class="dnew"><summary class="btn ghost small" style="display:inline-flex;list-style:none;cursor:pointer">+ Tambah toko baru dari lapangan</summary>
+        <div class="row" style="margin-top:12px">
+          <div class="field"><label for="nName">Nama toko</label><input type="text" id="nName"></div>
+          <div class="field"><label for="nCity">Kota / kabupaten</label><select id="nCity"><option>Yogyakarta</option><option>Sleman</option><option>Bantul</option><option>Solo</option></select></div>
+          <div class="field"><label for="nArea">Kecamatan</label><input type="text" id="nArea"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="nAddr">Alamat</label><input type="text" id="nAddr"></div>
+          <div class="field"><label for="nPhone">Telepon / WA</label><input type="tel" id="nPhone" placeholder="08xxxxxxxxxx"></div>
+        </div>
+        <button class="btn primary" type="button" id="nSave">Simpan ke direktori</button>
+      </details>
+      <p class="dstats" id="dirStats"></p>
+      <div class="dgrid" id="dirGrid"></div>
+    </div>
+    <p style="color:var(--warn);font-size:12px;">Data dari blog dan direktori online dengan tahun berbeda. Cek ulang alamat dan jam buka di Google Maps sebelum berkunjung.</p>`;
+  const cityBox = document.getElementById('dirCity');
+  [['','Semua'],['Jogja','Yogyakarta & sekitarnya'],['Solo','Solo']].forEach(c=>{
+    const b = document.createElement('button'); b.type='button'; b.className='dchip'; b.textContent=c[1];
+    b.setAttribute('aria-pressed', dirF.city===c[0]);
+    b.addEventListener('click', ()=>{ dirF.city=c[0]; dirF.area=''; renderDirektori(main); });
+    cityBox.appendChild(b);
+  });
+  const areaSel = document.getElementById('dirArea');
+  areaSel.innerHTML = '<option value="">Semua kecamatan</option>' + dirAreas().map(a=>`<option ${a===dirF.area?'selected':''}>${esc(a)}</option>`).join('');
+  document.getElementById('dirStat').value = dirF.stat;
+  document.getElementById('dirBrand').value = dirF.brand;
+  document.getElementById('dirBrand').addEventListener('change', e=>{ dirF.brand=e.target.value; renderDirList(); });
+  document.getElementById('nSave').addEventListener('click', ()=>{
+    const name=document.getElementById('nName').value.trim(), area=document.getElementById('nArea').value.trim();
+    if(!name || !area){ toast('Isi nama toko dan kecamatan'); return; }
+    DATA.dirCustom.push({id:uid(), name, city:document.getElementById('nCity').value, area, addr:document.getElementById('nAddr').value.trim(), phone:document.getElementById('nPhone').value.replace(/[^0-9]/g,'')});
+    persistLocal(); toast('Toko ditambahkan ke direktori'); renderDirektori(main);
+  });
+  document.getElementById('dirQ').addEventListener('input', e=>{ dirF.q=e.target.value; renderDirList(); });
+  areaSel.addEventListener('change', e=>{ dirF.area=e.target.value; renderDirList(); });
+  document.getElementById('dirStat').addEventListener('change', e=>{ dirF.stat=e.target.value; renderDirList(); });
+  renderDirList();
+}
+
+function renderDirList(){
+  const grid = document.getElementById('dirGrid'); if(!grid) return;
+  const t = dirF.q.toLowerCase();
+  const rows = allDir().map((d,i)=>({d,i})).filter(({d})=>{
+    if(!dirInCity(d)) return false;
+    if(dirF.area && d[2]!==dirF.area) return false;
+    const v = !!(DATA.dirState[d[0]]||{}).visited;
+    if(dirF.stat==='1' && !v) return false;
+    if(dirF.stat==='0' && v) return false;
+    const bs = (DATA.dirState[d[0]]||{}).brands||{};
+    if(dirF.brand==='JNC' && !bs.JNC) return false;
+    if(dirF.brand==='JR' && !bs.JR) return false;
+    if(dirF.brand==='none' && (bs.JNC||bs.JR)) return false;
+    return !t || (d[0]+' '+d[2]+' '+d[3]).toLowerCase().includes(t);
+  });
+  const nVisited = rows.filter(({d})=>(DATA.dirState[d[0]]||{}).visited).length;
+  document.getElementById('dirStats').textContent = `${rows.length} toko tampil, ${nVisited} sudah dikunjungi`;
+  if(!rows.length){ grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Tidak ada toko yang cocok. Ubah kata kunci atau filter.</div>'; return; }
+  grid.innerHTML = rows.map(({d,i})=>{
+    const st = DATA.dirState[d[0]]||{};
+    const place = d[1]==='Solo' ? 'Solo' : 'Yogyakarta';
+    const map = 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(d[0]+' '+d[3]+' '+place);
+    const wa = d[4] ? `<a class="btn ghost small" target="_blank" rel="noopener" href="https://wa.me/62${d[4].replace(/^0/,'')}">WhatsApp</a>` : '';
+    return `<article class="dcard ${st.visited?'done':''}">
+      <span class="tag ${st.added?'on':'warn'}">${st.added?'Sudah di database':d[1]==='Solo'?'Solo':d[1]}</span>
+      <h3>${esc(d[0])}</h3>
+      <div>${['JNC','JR'].map(b=>`<span class="tag ${(st.brands||{})[b]?'on':'off'}" style="margin-right:6px">${b} ${(st.brands||{})[b]?'ada':'belum'}</span>`).join('')}</div>
+      <p>${esc(d[3])} — ${esc(d[2])}</p>
+      <div class="dacts">
+        <a class="btn ghost small" target="_blank" rel="noopener" href="${map}">Buka Maps</a>${wa}
+        <button class="btn ghost small" type="button" data-brand="${i}|JNC">JNC</button>
+        <button class="btn ghost small" type="button" data-brand="${i}|JR">JR</button>
+        <button class="btn ghost small" type="button" data-vis="${i}">${st.visited?'Batalkan kunjungan':'Tandai dikunjungi'}</button>
+        ${st.added?'':`<button class="btn small" type="button" data-add="${i}">Tambah ke Database</button>`}
+        ${d[5]?`<button class="btn danger small" type="button" data-rm="${d[5]}">Hapus</button>`:''}
+      </div></article>`;
+  }).join('');
+  grid.querySelectorAll('[data-vis]').forEach(b=>b.addEventListener('click', ()=>{
+    const k = allDir()[+b.dataset.vis][0]; const s = DATA.dirState[k] = DATA.dirState[k]||{};
+    s.visited = !s.visited; persistLocal(); renderDirList();
+  }));
+  grid.querySelectorAll('[data-brand]').forEach(b=>b.addEventListener('click', ()=>{
+    const [i,br] = b.dataset.brand.split('|'); const k = allDir()[+i][0];
+    const s = DATA.dirState[k] = DATA.dirState[k]||{}; s.brands = s.brands||{}; s.brands[br] = !s.brands[br];
+    persistLocal(); renderDirList();
+  }));
+  grid.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click', ()=>{
+    if(!confirm('Hapus toko ini dari direktori?')) return;
+    DATA.dirCustom = DATA.dirCustom.filter(c=>c.id!==b.dataset.rm); persistLocal(); renderDirList();
+  }));
+  grid.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click', async ()=>{
+    const d = allDir()[+b.dataset.add];
+    await writeRecord('storedb', null, {srId: document.getElementById('dirSR').value, storeName:d[0], updated: todayStr()});
+    const s = DATA.dirState[d[0]] = DATA.dirState[d[0]]||{}; s.added = true;
+    persistLocal(); toast(d[0]+' masuk ke Database Toko'); renderDirList();
+  }));
+}
+
+/* ---------- Init ---------- */
+renderNav();
+renderMain();
+initData();
+</script>
+</body>
+</html>
